@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $converterPath = Join-Path -Path $PSScriptRoot -ChildPath 'ConvertChineseName.ps1'
 if (-not (Test-Path -LiteralPath $converterPath)) {
