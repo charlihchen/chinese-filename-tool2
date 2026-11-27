@@ -344,9 +344,10 @@ namespace ChineseFilenameTool
             MaximizeBox = false;
 
             Label description = new Label();
-            description.AutoSize = true;
-            description.Location = new Point(30, 25);
-            description.Text = "\u5B89\u88DD\u5F8C\uFF0C\u5728\u6A94\u6848\u6216\u8CC7\u6599\u593E\u6309\u53F3\u9375\u5373\u53EF\u4F7F\u7528\u3002\u4E5F\u53EF\u5728\u8CC7\u6599\u593E\u7A7A\u767D\u8655\u6309\u53F3\u9375\u8F49\u63DB\u6574\u593E\u5167\u6A94\u540D\u3002";
+            description.AutoSize = false;
+            description.Size = new Size(400, 40);
+            description.Location = new Point(30, 20);
+            description.Text = "\u5B89\u88DD\u5F8C\uFF0C\u5728\u6A94\u6848\u6216\u8CC7\u6599\u593E\u6309\u53F3\u9375\u5373\u53EF\u4F7F\u7528\u3002\n\u4E5F\u53EF\u5728\u8CC7\u6599\u593E\u7A7A\u767D\u8655\u6309\u53F3\u9375\u8F49\u63DB\u6574\u593E\u5167\u6A94\u540D\u3002";
 
             Button installButton = new Button();
             installButton.Text = "\u5B89\u88DD\u9019\u500B\u5DE5\u5177";
