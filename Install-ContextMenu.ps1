@@ -18,12 +18,13 @@ function Install-MenuEntry {
         [string]$Root,
         [string]$Name,
         [string]$Label,
-        [string]$Direction
+        [string]$Direction,
+        [string]$Argument
     )
 
     $baseKey = [Microsoft.Win32.Registry]::CurrentUser
     $menuPath = "$Root\shell\$Name"
-    $command = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $converterPath + '" -Direction "' + $Direction + '" -Path "%1" %*'
+    $command = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $converterPath + '" -Direction "' + $Direction + '" -Path "' + $Argument + '" %*'
     $menuKey = $baseKey.CreateSubKey($menuPath)
 
     try {
@@ -42,15 +43,24 @@ function Install-MenuEntry {
     }
 }
 
-$roots = @(
+# File/folder context menu (multi-select)
+$fileRoots = @(
     'Software\Classes\*',
     'Software\Classes\Directory'
 )
 
-foreach ($root in $roots) {
-    Install-MenuEntry -Root $root -Name 'ConvertChinese.ToTraditional' -Label $traditionalLabel -Direction 'ToTraditional'
-    Install-MenuEntry -Root $root -Name 'ConvertChinese.ToSimplified' -Label $simplifiedLabel -Direction 'ToSimplified'
+foreach ($root in $fileRoots) {
+    Install-MenuEntry -Root $root -Name 'ConvertChinese.ToTraditional' -Label $traditionalLabel -Direction 'ToTraditional' -Argument '%1'
+    Install-MenuEntry -Root $root -Name 'ConvertChinese.ToSimplified' -Label $simplifiedLabel -Direction 'ToSimplified' -Argument '%1'
 }
 
-Write-Host 'Context menu installed for files and folders.'
+# Folder background context menu (right-click empty space in folder) - passes folder path via %V
+$bgRoots = @('Software\Classes\Directory\Background')
+
+foreach ($root in $bgRoots) {
+    Install-MenuEntry -Root $root -Name 'ConvertChinese.ToTraditionalFolder' -Label '轉換此資料夾內所有檔名為繁體中文' -Direction 'ToTraditional' -Argument '%V'
+    Install-MenuEntry -Root $root -Name 'ConvertChinese.ToSimplifiedFolder' -Label '轉換此資料夾內所有檔名為簡體中文' -Direction 'ToSimplified' -Argument '%V'
+}
+
+Write-Host 'Context menu installed for files, folders, and folder backgrounds.'
 Write-Host 'If Explorer does not refresh immediately, restart Explorer or sign out and in.'

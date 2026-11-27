@@ -5,6 +5,8 @@ param(
 
     [switch]$Quiet,
 
+    [switch]$Folder,
+
     [Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
     [string[]]$Path
 )
@@ -46,21 +48,21 @@ function Convert-ChineseText {
     # Windows StrConv handles the basic character conversion. These phrase
     # replacements make common Taiwan-style filenames more natural.
     $toTraditionalPhrases = New-Object System.Collections.Specialized.OrderedDictionary
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u8F6F\u4EF6'), (Unescape-Unicode '\u8EDF\u9AD4'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u6587\u4EF6'), (Unescape-Unicode '\u6A94\u6848'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u7F51\u7EDC'), (Unescape-Unicode '\u7DB2\u8DEF'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u89C6\u9891'), (Unescape-Unicode '\u5F71\u7247'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u670D\u52A1\u5668'), (Unescape-Unicode '\u4F3A\u670D\u5668'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u6570\u636E\u5E93'), (Unescape-Unicode '\u8CC7\u6599\u5EAB'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u7A0B\u5E8F'), (Unescape-Unicode '\u7A0B\u5F0F'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u6253\u5370\u673A'), (Unescape-Unicode '\u5370\u8868\u6A5F'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u9F20\u6807'), (Unescape-Unicode '\u6ED1\u9F20'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u786C\u76D8'), (Unescape-Unicode '\u786C\u789F'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u5C4F\u5E55'), (Unescape-Unicode '\u87A2\u5E55'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u8D26\u6237'), (Unescape-Unicode '\u5E33\u6236'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u8D26\u53F7'), (Unescape-Unicode '\u5E33\u865F'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u4FE1\u606F'), (Unescape-Unicode '\u8CC7\u8A0A'))
-    $toTraditionalPhrases.Add((Unescape-Unicode '\u6587\u4EF6\u5939'), (Unescape-Unicode '\u8CC7\u6599\u593E'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '软件'), (Unescape-Unicode '軟體'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '文件'), (Unescape-Unicode '檔案'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '网络'), (Unescape-Unicode '網路'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '视频'), (Unescape-Unicode '影片'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '服务器'), (Unescape-Unicode '伺服器'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '数据库'), (Unescape-Unicode '資料庫'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '程序'), (Unescape-Unicode '程式'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '打印机'), (Unescape-Unicode '印表機'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '鼠标'), (Unescape-Unicode '滑鼠'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '硬盘'), (Unescape-Unicode '硬碟'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '屏幕'), (Unescape-Unicode '螢幕'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '账户'), (Unescape-Unicode '帳戶'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '账号'), (Unescape-Unicode '帳號'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '信息'), (Unescape-Unicode '資訊'))
+    $toTraditionalPhrases.Add((Unescape-Unicode '文件夹'), (Unescape-Unicode '資料夾'))
 
     $toSimplifiedPhrases = New-Object System.Collections.Specialized.OrderedDictionary
     foreach ($pair in $toTraditionalPhrases.GetEnumerator()) {
@@ -104,50 +106,97 @@ function Get-ParentDirectory {
     return $Item.DirectoryName
 }
 
-$renamed = New-Object System.Collections.Generic.List[string]
-$skipped = New-Object System.Collections.Generic.List[string]
-$errors = New-Object System.Collections.Generic.List[string]
+function Rename-SingleItem {
+    param(
+        [string]$FullPath,
+        [bool]$IsDirectory,
+        [string]$Direction,
+        [ref]$Renamed,
+        [ref]$Skipped,
+        [ref]$Errors
+    )
 
-foreach ($inputPath in ($Path | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
     try {
-
-        $item = Get-Item -LiteralPath $inputPath -Force -ErrorAction Stop
-        $parent = Get-ParentDirectory -Item $item
-
-        if ([string]::IsNullOrWhiteSpace($parent)) {
-            $errors.Add("Cannot rename a filesystem root: $($item.FullName)")
-            continue
+        $parent = if ($IsDirectory) {
+            $info = Get-Item -LiteralPath $FullPath -Force
+            if ($null -eq $info.Parent) { return }
+            $info.Parent.FullName
+        } else {
+            $info = Get-Item -LiteralPath $FullPath -Force
+            $info.DirectoryName
         }
 
-        $extension = ''
-        $baseName = $item.Name
+        $name = (Get-Item -LiteralPath $FullPath -Force).Name
+        $extension = if ($IsDirectory) { '' } else { [System.IO.Path]::GetExtension($name) }
+        $baseName = if ($extension.Length -eq 0) { $name } else { $name.Substring(0, $name.Length - $extension.Length) }
+        $newName = Convert-ChineseText -Text $baseName -Mode $Direction + $extension
 
-        if (-not $item.PSIsContainer) {
-            $extension = [System.IO.Path]::GetExtension($item.Name)
-            if ($extension.Length -gt 0) {
-                $baseName = $item.Name.Substring(0, $item.Name.Length - $extension.Length)
-            }
-        }
-
-        $convertedBaseName = Convert-ChineseText -Text $baseName -Mode $Direction
-        $newName = $convertedBaseName + $extension
-
-        if ($newName -eq $item.Name) {
-            $skipped.Add("No change: $($item.Name)")
-            continue
+        if ($newName -eq $name) {
+            $Skipped.Value.Add("No change: $name")
+            return
         }
 
         $targetPath = Join-Path -Path $parent -ChildPath $newName
         if (Test-Path -LiteralPath $targetPath) {
-            $errors.Add("Name already exists: $newName")
-            continue
+            $Errors.Value.Add("$name : target already exists")
+            return
         }
 
-        Rename-Item -LiteralPath $item.FullName -NewName $newName -ErrorAction Stop
-        $renamed.Add("$($item.Name) -> $newName")
+        Rename-Item -LiteralPath $FullPath -NewName $newName -ErrorAction Stop
+        $Renamed.Value.Add("$name -> $newName")
     }
     catch {
-        $errors.Add("$inputPath : $($_.Exception.Message)")
+        $Errors.Value.Add("$FullPath : $($_.Exception.Message)")
+    }
+}
+
+$renamed = New-Object System.Collections.Generic.List[string]
+$skipped = New-Object System.Collections.Generic.List[string]
+$errors = New-Object System.Collections.Generic.List[string]
+
+if ($Folder) {
+    $folderPath = $Path[0]
+    if (-not (Test-Path -LiteralPath $folderPath -PathType Container)) {
+        $errors.Add("Invalid folder: $folderPath")
+    }
+    else {
+        $recursive = $false
+        if (-not $Quiet) {
+            Add-Type -AssemblyName System.Windows.Forms
+            $dr = [System.Windows.Forms.MessageBox]::Show(
+                "是否包含子資料夾一併轉換？\n\n是 = 適用到所有子層級\n否 = 只轉換此層級目錄檔名和子資料夾",
+                "轉換範圍",
+                [System.Windows.Forms.MessageBoxButtons]::YesNo,
+                [System.Windows.Forms.MessageBoxIcon]::Question
+            )
+            $recursive = ($dr -eq [System.Windows.Forms.DialogResult]::Yes)
+        }
+
+        $searchOpt = if ($recursive) { 'AllDirectories' } else { 'TopDirectoryOnly' }
+
+        # Get directories bottom-up (deepest first) so renaming parents doesn't break child enumeration
+        $dirs = Get-ChildItem -LiteralPath $folderPath -Directory -Recurse:$recursive | Sort-Object { $_.FullName.Length } -Descending
+        foreach ($dir in $dirs) {
+            Rename-SingleItem -FullPath $dir.FullName -IsDirectory $true -Direction $Direction -Renamed ([ref]$renamed) -Skipped ([ref]$skipped) -Errors ([ref]$errors)
+        }
+
+        # Then files
+        $files = Get-ChildItem -LiteralPath $folderPath -File -Recurse:$recursive
+        foreach ($file in $files) {
+            Rename-SingleItem -FullPath $file.FullName -IsDirectory $false -Direction $Direction -Renamed ([ref]$renamed) -Skipped ([ref]$skipped) -Errors ([ref]$errors)
+        }
+    }
+}
+else {
+    foreach ($inputPath in ($Path | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
+        try {
+            $item = Get-Item -LiteralPath $inputPath -Force -ErrorAction Stop
+            $isDir = $item.PSIsContainer
+            Rename-SingleItem -FullPath $item.FullName -IsDirectory $isDir -Direction $Direction -Renamed ([ref]$renamed) -Skipped ([ref]$skipped) -Errors ([ref]$errors)
+        }
+        catch {
+            $errors.Add("$inputPath : $($_.Exception.Message)")
+        }
     }
 }
 
