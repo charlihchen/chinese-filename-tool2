@@ -41,21 +41,21 @@ namespace ChineseFilenameTool
     {
         private static readonly Phrase[] Phrases = new Phrase[]
         {
-            new Phrase("软件", "軟體"),
-            new Phrase("文件夹", "資料夾"),
-            new Phrase("文件", "檔案"),
-            new Phrase("网络", "網路"),
-            new Phrase("视频", "影片"),
-            new Phrase("服务器", "伺服器"),
-            new Phrase("数据库", "資料庫"),
-            new Phrase("程序", "程式"),
-            new Phrase("打印机", "印表機"),
-            new Phrase("鼠标", "滑鼠"),
-            new Phrase("硬盘", "硬碟"),
-            new Phrase("屏幕", "螢幕"),
-            new Phrase("账户", "帳戶"),
-            new Phrase("账号", "帳號"),
-            new Phrase("信息", "資訊")
+            new Phrase("\u8F6F\u4EF6", "\u8EDF\u9AD4"),
+            new Phrase("\u6587\u4EF6\u5939", "\u8CC7\u6599\u593E"),
+            new Phrase("\u6587\u4EF6", "\u6A94\u6848"),
+            new Phrase("\u7F51\u7EDC", "\u7DB2\u8DEF"),
+            new Phrase("\u89C6\u9891", "\u5F71\u7247"),
+            new Phrase("\u670D\u52A1\u5668", "\u4F3A\u670D\u5668"),
+            new Phrase("\u6570\u636E\u5E93", "\u8CC7\u6599\u5EAB"),
+            new Phrase("\u7A0B\u5E8F", "\u7A0B\u5F0F"),
+            new Phrase("\u6253\u5370\u673A", "\u5370\u8868\u6A5F"),
+            new Phrase("\u9F20\u6807", "\u6ED1\u9F20"),
+            new Phrase("\u786C\u76D8", "\u786C\u789F"),
+            new Phrase("\u5C4F\u5E55", "\u87A2\u5E55"),
+            new Phrase("\u8D26\u6237", "\u5E33\u6236"),
+            new Phrase("\u8D26\u53F7", "\u5E33\u865F"),
+            new Phrase("\u4FE1\u606F", "\u8CC7\u8A0A")
         };
 
         public static string ConvertText(string text, bool toTraditional)
@@ -271,11 +271,11 @@ namespace ChineseFilenameTool
         {
             RemoveLegacyEntries();
             // File/folder context menu (multi-select)
-            InstallVerb(TraditionalVerb, "轉換檔名為繁體中文", "--to-traditional", executablePath, FileRoots);
-            InstallVerb(SimplifiedVerb, "轉換檔名為簡體中文", "--to-simplified", executablePath, FileRoots);
+            InstallVerb(TraditionalVerb, "\u8F49\u63DB\u6A94\u540D\u70BA\u7E41\u9AD4\u4E2D\u6587", "--to-traditional", executablePath, FileRoots);
+            InstallVerb(SimplifiedVerb, "\u8F49\u63DB\u6A94\u540D\u70BA\u7C21\u9AD4\u4E2D\u6587", "--to-simplified", executablePath, FileRoots);
             // Folder background context menu (right-click empty space in folder)
-            InstallVerb(TraditionalFolderVerb, "轉換此資料夾內所有檔名為繁體中文", "--to-traditional --folder", executablePath, FolderBackgroundRoots);
-            InstallVerb(SimplifiedFolderVerb, "轉換此資料夾內所有檔名為簡體中文", "--to-simplified --folder", executablePath, FolderBackgroundRoots);
+            InstallVerb(TraditionalFolderVerb, "\u8F49\u63DB\u6B64\u8CC7\u6599\u593E\u5167\u6240\u6709\u6A94\u540D\u70BA\u7E41\u9AD4\u4E2D\u6587", "--to-traditional --folder", executablePath, FolderBackgroundRoots);
+            InstallVerb(SimplifiedFolderVerb, "\u8F49\u63DB\u6B64\u8CC7\u6599\u593E\u5167\u6240\u6709\u6A94\u540D\u70BA\u7C21\u9AD4\u4E2D\u6587", "--to-simplified --folder", executablePath, FolderBackgroundRoots);
         }
 
         private static void InstallVerb(string verb, string label, string direction, string executablePath, string[] roots)
@@ -337,7 +337,7 @@ namespace ChineseFilenameTool
 
         public MainForm()
         {
-            Text = "繁簡檔名轉換工具";
+            Text = "\u7E41\u7C21\u6A94\u540D\u8F49\u63DB\u5DE5\u5177";
             ClientSize = new Size(460, 220);
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -346,16 +346,16 @@ namespace ChineseFilenameTool
             Label description = new Label();
             description.AutoSize = true;
             description.Location = new Point(30, 25);
-            description.Text = "安裝後，在檔案或資料夾按右鍵即可使用。也可在資料夾空白處按右鍵轉換整夾內檔名。";
+            description.Text = "\u5B89\u88DD\u5F8C\uFF0C\u5728\u6A94\u6848\u6216\u8CC7\u6599\u593E\u6309\u53F3\u9375\u5373\u53EF\u4F7F\u7528\u3002\u4E5F\u53EF\u5728\u8CC7\u6599\u593E\u7A7A\u767D\u8655\u6309\u53F3\u9375\u8F49\u63DB\u6574\u593E\u5167\u6A94\u540D\u3002";
 
             Button installButton = new Button();
-            installButton.Text = "安裝這個工具";
+            installButton.Text = "\u5B89\u88DD\u9019\u500B\u5DE5\u5177";
             installButton.Location = new Point(30, 75);
             installButton.Size = new Size(180, 42);
             installButton.Click += InstallButton_Click;
 
             Button uninstallButton = new Button();
-            uninstallButton.Text = "刪除這個工具";
+            uninstallButton.Text = "\u522A\u9664\u9019\u500B\u5DE5\u5177";
             uninstallButton.Location = new Point(230, 75);
             uninstallButton.Size = new Size(180, 42);
             uninstallButton.Click += UninstallButton_Click;
@@ -363,7 +363,7 @@ namespace ChineseFilenameTool
             statusLabel = new Label();
             statusLabel.AutoSize = true;
             statusLabel.Location = new Point(30, 145);
-            statusLabel.Text = "狀態：尚未操作";
+            statusLabel.Text = "\u72C0\u614B\uFF1A\u5C1A\u672A\u64CD\u4F5C";
 
             Controls.Add(description);
             Controls.Add(installButton);
@@ -376,8 +376,8 @@ namespace ChineseFilenameTool
             try
             {
                 ToolRegistry.Install(Application.ExecutablePath);
-                statusLabel.Text = "狀態：安裝完成";
-                MessageBox.Show("右鍵選單已安裝。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                statusLabel.Text = "\u72C0\u614B\uFF1A\u5B89\u88DD\u5B8C\u6210";
+                MessageBox.Show("\u53F3\u9375\u9078\u55AE\u5DF2\u5B89\u88DD\u3002", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -390,8 +390,8 @@ namespace ChineseFilenameTool
             try
             {
                 ToolRegistry.Uninstall();
-                statusLabel.Text = "狀態：已刪除右鍵選單";
-                MessageBox.Show("右鍵選單已刪除。\r\n\r\nEXE 檔案請手動刪除。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                statusLabel.Text = "\u72C0\u614B\uFF1A\u5DF2\u522A\u9664\u53F3\u9375\u9078\u55AE";
+                MessageBox.Show("\u53F3\u9375\u9078\u55AE\u5DF2\u522A\u9664\u3002\r\n\r\nEXE \u6A94\u6848\u8ACB\u624B\u52D5\u522A\u9664\u3002", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -458,8 +458,8 @@ namespace ChineseFilenameTool
                 if (!quiet)
                 {
                     DialogResult dr = MessageBox.Show(
-                        "是否包含子資料夾一佝轉換？\n\n是(是) = 適用到所有子層类\n否(否) = 只轉換此層类目錄檔名和子資料夾",
-                        "轉換檄影範圍",
+                        "\u662F\u5426\u5305\u542B\u5B50\u8CC7\u6599\u593E\u4E00\u4F5D\u8F49\u63DB\uFF1F\n\n\u662F(\u662F) = \u9069\u7528\u5230\u6240\u6709\u5B50\u5C64\u7C7B\n\u5426(\u5426) = \u53EA\u8F49\u63DB\u6B64\u5C64\u7C7B\u76EE\u9304\u6A94\u540D\u548C\u5B50\u8CC7\u6599\u593E",
+                        "\u8F49\u63DB\u6A84\u5F71\u7BC4\u570D",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question);
                     recursive = (dr == DialogResult.Yes);
@@ -482,9 +482,9 @@ namespace ChineseFilenameTool
             }
 
             List<string> lines = new List<string>();
-            lines.Add("已重新命名：" + result.Renamed.Count);
-            lines.Add("無需變更：" + result.Skipped.Count);
-            lines.Add("錯誤：" + result.Errors.Count);
+            lines.Add("\u5DF2\u91CD\u65B0\u547D\u540D\uFF1A" + result.Renamed.Count);
+            lines.Add("\u7121\u9700\u8B8A\u66F4\uFF1A" + result.Skipped.Count);
+            lines.Add("\u932F\u8AA4\uFF1A" + result.Errors.Count);
             if (result.Renamed.Count > 0)
             {
                 lines.Add(String.Empty);
@@ -495,7 +495,7 @@ namespace ChineseFilenameTool
                 lines.Add(String.Empty);
                 lines.AddRange(result.Errors);
             }
-            MessageBox.Show(String.Join(Environment.NewLine, lines), "檔名轉換", MessageBoxButtons.OK, result.Errors.Count > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+            MessageBox.Show(String.Join(Environment.NewLine, lines), "\u6A94\u540D\u8F49\u63DB", MessageBoxButtons.OK, result.Errors.Count > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
             return result.Errors.Count == 0 ? 0 : 1;
         }
     }
